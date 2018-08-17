@@ -661,23 +661,30 @@ class Ui_CheckWindow(object):
         self.pushButton_4.setVisible(False)
 
     def Check_slot1(self):
+        global Read
+        global Final
+        Read = dict()
+        Final = dict()
+
         path = self.textEdit.toPlainText()
         path = path.replace("file:///","")
         _start(path)
 
         self.textEdit.clear()
-        self.tableWidget.clear()
+        while self.tableWidget.rowCount() > 0:
+            self.tableWidget.removeRow(0);
 
         for i in Read:
-            ddd=""
+            str1 = ""
             row_number = 0
             self.tableWidget.insertRow(row_number)
             self.tableWidget.setItem(row_number, 0, QtWidgets.QTableWidgetItem(str(i)))
             self.tableWidget.setItem(row_number, 1, QtWidgets.QTableWidgetItem(Read[i][0]))
             for j in Final[i]:
-                ddd+=j+" "
-            self.tableWidget.setItem(row_number, 2, QtWidgets.QTableWidgetItem(ddd))
+                str1 += j+" "
+            self.tableWidget.setItem(row_number, 2, QtWidgets.QTableWidgetItem(str1))
             row_number += 1
+
 
         self.pushButton_2.setVisible(True)
         self.pushButton_3.setVisible(True)

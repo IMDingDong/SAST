@@ -546,6 +546,47 @@ def _start(path):
 
     f.close()
 
+
+def html(sourcePath, result):
+    f = open(result, "w")
+    fp = open(sourcePath, "r")
+    LN = 1
+    f.write("""<html>
+<head>
+	<style>
+		.highlight {
+			color: #ccc;
+		}
+		.vul {
+			color: red;
+		}
+	</style>
+</head>
+<body>
+""")
+    while True:
+        z = 0
+        line = fp.readline()
+
+        if (Final[LN] == []):
+            f.write("{:<6} {}<br>".format(LN, line).replace(" ", "&nbsp;").replace(" ", "&emsp;"))
+        else:
+            alert = ""
+            for i in Final[LN]:
+                alert += c_ruleset[i][0] + "\\n\\n"
+            f.write("<span class='vul' onclick='alert(\"{}\")'>".format(
+                alert.replace("\"", "&quot;").replace("\'", "&#039;")) + "{:<6}{}		// Danger<br>".format(LN,
+                                                                                                               line).replace(
+                " ", "&nbsp;").replace("\t", "&emsp;") + "</span>")
+        LN += 1
+        if not line: break
+
+    f.write("""</body>
+</html>""")
+
+    f.close()
+    fp.close()
+
 class Ui_CheckWindow(object):
     def setupUi(self, CheckWindow):
         CheckWindow.setObjectName("CheckWindow")
@@ -577,9 +618,9 @@ class Ui_CheckWindow(object):
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
-        self.textBrowser = QtWidgets.QTextBrowser(self.tab_2)
-        self.textBrowser.setGeometry(QtCore.QRect(-5, -2, 671, 581))
-        self.textBrowser.setObjectName("textBrowser")
+        self.textEdit_2 = QtWidgets.QTextEdit(self.tab_2)
+        self.textEdit_2.setGeometry(QtCore.QRect(-5, -2, 671, 581))
+        self.textEdit_2.setObjectName("textEdit_2")
         self.tabWidget.addTab(self.tab_2, "")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(720, 19, 64, 15))
@@ -665,12 +706,23 @@ class Ui_CheckWindow(object):
         global Final
         Read = dict()
         Final = dict()
+        global path
 
-        path = self.textEdit.toPlainText()
-        path = path.replace("file:///","")
-        _start(path)
+        if self.tabWidget.currentIndex() == 0:
+            source = self.textEdit.toPlainText()
+            path = "./CheckSourceCode.c"
+            wSourceFile = open(path, 'w')
+            wSourceFile.write(source)
+            wSourceFile.close()
+            _start(path)
+            self.textEdit.clear()
 
-        self.textEdit.clear()
+        elif self.tabWidget.currentIndex() == 1:
+            path = self.textEdit_2.toPlainText()
+            path = path.replace("file:///", "")
+            _start(path)
+            self.textEdit_2.clear()
+
         while self.tableWidget.rowCount() > 0:
             self.tableWidget.removeRow(0);
 
@@ -685,7 +737,6 @@ class Ui_CheckWindow(object):
             self.tableWidget.setItem(row_number, 2, QtWidgets.QTableWidgetItem(str1))
             row_number += 1
 
-
         self.pushButton_2.setVisible(True)
         self.pushButton_3.setVisible(True)
         self.pushButton_4.setVisible(True)
@@ -694,7 +745,7 @@ class Ui_CheckWindow(object):
         pass
 
     def Check_slot3(self):
-        pass
+        html(path, "result.html")
 
     def Check_slot4(self):
         pass
@@ -705,17 +756,16 @@ class Ui_CheckWindow(object):
         item2 = self.tableWidget.item(row, 1)
         item3 = self.tableWidget.item(row, 2)
 
-        t=item3.text().replace(" ","")
+        rule = item3.text().replace(" ","")
 
         self.textBrowser_2.clear()
         self.textBrowser_3.clear()
         self.textBrowser_4.clear()
 
-        self.textBrowser_2.append(t)
-        self.textBrowser_2.append(c_ruleset[t][0])
-        self.textBrowser_3.append(c_ruleset[t][1])
-        self.textBrowser_4.append("https://stackoverflow.com/search?q="+t)
-
+        self.textBrowser_2.append(rule)
+        self.textBrowser_2.append(c_ruleset[rule][0])
+        self.textBrowser_3.append(c_ruleset[rule][1])
+        self.textBrowser_4.append("https://stackoverflow.com/search?q="+rule)
 
     def retranslateUi(self, CheckWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -729,7 +779,7 @@ class Ui_CheckWindow(object):
         self.pushButton.setText(_translate("CheckWindow", "검사"))
         self.pushButton_2.setText(_translate("CheckWindow", "TXT"))
         self.pushButton_3.setText(_translate("CheckWindow", "HTML"))
-        self.pushButton_4.setText(_translate("CheckWindow", "PushButton"))
+        self.pushButton_4.setText(_translate("CheckWindow", "CSV"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("CheckWindow", "라인"))
         item = self.tableWidget.horizontalHeaderItem(1)
@@ -746,4 +796,3 @@ if __name__ == "__main__":
     ui.setupUi(CheckWindow)
     CheckWindow.show()
     sys.exit(app.exec_())
-
